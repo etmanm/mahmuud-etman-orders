@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>عرض البيانات من Firebase Realtime Database</title>
+    <!-- استيراد مكتبة Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+    <link rel="stylesheet" href="employees. folders/style.css">
+    <nav class="navbar"> 
+       <li><a href="index.html"style="text-decoration: solid;">الشاشة الرئيسية</a></li> 
+       <li><a href="salls.html" style="text-decoration: solid;">منتجاتنا</a></li>  
+   </nav>
+    <script>
+        // تهيئة المشروع في Firebase
+        var firebaseConfig = {
+            apiKey: "AIzaSyDiA33pSdYWkEmgVLJfnbxuPFZcbQW3LFE",
+  authDomain: "mahmuud-etman-parmacy.firebaseapp.com",
+  projectId: "mahmuud-etman-parmacy",
+  storageBucket: "mahmuud-etman-parmacy.appspot.com",
+  messagingSenderId: "325935139544",
+  appId: "1:325935139544:web:064ad4523474f0a689e5ad",
+  measurementId: "G-4G85ECPH3C"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        // الحصول على مرجع لخدمة قاعدة بيانات Firebase Realtime Database
+        var database = firebase.database();
+
+        // استرداد البيانات من Firebase Realtime Database باستخدام متغير "database"
+        function getTableHTML(name, address, phone, products, totalPrice, childSnapshot) {
+            var tableHTML = "<table>" +
+                "<thead><tr><th>المنتج</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead>" +
+                "<tbody>";
+            for (var i in products) {
+                var product = products[i];
+                var productName = product.name;
+                var productQuantity = product.quantity;
+                var productPrice = product.price;
+                tableHTML += "<tr><td>" + productName + "</td><td>" + productQuantity + "</td><td>" + productPrice + "</td><td>" + totalPrice + "</td></tr>";
+            }
+            tableHTML += "</tbody></table>";
+            var div = document.createElement("div");
+            div.innerHTML = "<h2>" + name + "</h2>" + "<p>" + address + "</p>" + "<p>" + phone + "</p>" + tableHTML;
+
+            var deleteButton = document.createElement("button");
+            deleteButton.innerHTML = "حذف";
+            deleteButton.onclick = function() {
+                database.ref("orders/" + childSnapshot.key).remove();
+                location.reload();
+            };
+            div.appendChild(deleteButton);
+
+            return div;
+        }
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+ 
+    <!-- جدول لعرض المعلومات -->
+    <div id="tables-container"></div>
+
+    <!-- تحميل البيانات من Firebase Realtime Database -->
+    <script>
+        var ordersRef = database.ref("orders");
+        ordersRef.on("value", function (snapshot) {
+            document.getElementById("tables-container").innerHTML = "";
+            snapshot.forEach(function (childSnapshot) {
+                var order = childSnapshot.val();
+                var totalPrice = order.totalPrice; // إضافة خاصية totalPrice إلى كائن الطلب
+                var cname = order.cname;
+                var address = order.address;
+                var phone = order.phone;
+                var products = order.products;
+
+                var tableHTML = getTableHTML(cname, address, phone, products, totalPrice, childSnapshot);
+                document.getElementById("tables-container").appendChild(tableHTML);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

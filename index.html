@@ -1,0 +1,254 @@
+
+<head>
+	<title>Product Sales</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-storage.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-analytics.js"></script>
+	<script src="https://www.gstatic.com/firebase/init.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	
+	<style>body {
+		font-family: Arial, sans-serif;
+		background-color: #F5F5F5;
+	  }
+	  
+	  h1 {
+		text-align: center;
+		color: #333;
+	  }
+	  
+	  #product-container {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+	  }
+	  
+	  .product {
+		width: 300px;
+		margin: 20px;
+		padding: 20px;
+		background-color: white;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+		text-align: center;
+	  }
+	  
+	  .product img {
+		max-width: 100%;
+		height: auto;
+	  }
+	  
+	  .product h3 {
+		margin-top: 0;
+		color: #333;
+	  }
+	  
+	  .product p {
+		margin-bottom: 0;
+	  }
+
+	  #product-form {
+		margin-top: 40px;
+		background-color: white;
+		padding: 20px;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	  }
+	  
+	  #product-form h2 {
+		color: #333;
+		margin-top: 0;
+	  }
+	  
+	  #product-form label {
+		display: block;
+		margin-bottom: 10px;
+		color: #333;
+	  }
+	  
+	  #product-form input[type="text"] {
+		width: 100%;
+		padding: 8px;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+		box-sizing: border-box;
+		margin-bottom: 10px;
+	  }
+	  
+	  #product-form button[type="submit"] {
+		background-color: #333;
+		color: white;
+		padding: 8px 16px;
+		border: none;
+		border-radius: 4px;
+		cursor: pointer;
+	  }
+	  
+	  #product-form button[type="submit"]:hover {
+		background-color: #555;
+	  }
+		.product {
+			border: 1px solid black;
+			padding: 10px;
+			margin: 10px;
+			display: inline-block;
+			vertical-align: top;
+			text-align: center;
+		}
+
+		table {
+			border-collapse: collapse;
+			margin-top: 20px;
+		}
+
+		th {
+			background-color: #f2f2f2;
+			padding: 10px;
+			text-align: left;
+		}
+
+		td {
+			border: 1px solid black;
+			padding: 10px;
+			text-align: left;
+		}
+
+		button {
+
+			margin: 5px;
+			padding: 8px 16px;
+		}
+	</style>
+</head>
+<body>
+	<nav class="navbar">
+		<li><a href="index.html"style="text-decoration: solid;">الشاشة الرئيسية</a></li> 
+		<li><a href="salls.html" style="text-decoration: solid;">منتجاتنا</a></li>  
+	</nav>
+	<h1>Product Sales</h1>
+
+	<div id="product-container"></div>
+
+	<header class="header">
+
+    </header>
+	<!-- Add a form to add products -->
+	<form id="product-form">
+		<h2>Add Product</h2>
+		<label for="product-name">Name:</label>
+		<input type="text" id="product-name" name="name"><br>
+		<label for="product-price">Price:</label>
+		<input type="text" id="product-price" name="price"><br>
+		<label for="product-quantity">Quantity:</label>
+		<input type="number" id="product-quantity" name="quantity" min="1" value="1"><br>
+		<label for="product-image">Image URL:</label>
+		<input type="text" id="product-image" name="image"><br>
+		<button type="submit">Add Product</button>
+	</form>
+	
+	<div id="product-container"></div>
+		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<script>
+		var firebaseConfig = {
+			apiKey: "AIzaSyDiA33pSdYWkEmgVLJfnbxuPFZcbQW3LFE",
+  authDomain: "mahmuud-etman-parmacy.firebaseapp.com",
+  projectId: "mahmuud-etman-parmacy",
+  storageBucket: "mahmuud-etman-parmacy.appspot.com",
+  messagingSenderId: "325935139544",
+  appId: "1:325935139544:web:064ad4523474f0a689e5ad",
+  measurementId: "G-4G85ECPH3C"	};
+		firebase.initializeApp(firebaseConfig);
+		firebase.analytics();
+		var database = firebase.database();
+		var productContainer = document.getElementById("product-container");
+	
+		// Function to retrieve product list from the database
+		function getProducts() {
+			database.ref("products").on("value", function(snapshot) {
+				productContainer.innerHTML = ""; // Clear previous product list
+				var products = snapshot.val();
+				
+				for (var key in products) {
+					var product = products[key];
+					var productDiv = document.createElement("div");
+					productDiv.classList.add("product");
+	
+					var image = document.createElement("img");
+					image.src = product.image;
+					productDiv.appendChild(image);
+	
+					var name = document.createElement("h3");
+					name.textContent = product.name;
+					productDiv.appendChild(name);
+	
+					var price = document.createElement("p");
+					price.textContent = "$" + product.price.toFixed(2);
+					productDiv.appendChild(price);
+	
+					var quantity = document.createElement("p");
+					quantity.textContent = "Quantity available: " + product.quantity;
+					productDiv.appendChild(quantity);
+	
+					var deleteButton = document.createElement("button");
+					deleteButton.textContent = "Delete";
+					deleteButton.dataset.key = key;
+					deleteButton.addEventListener("click", function() {
+						var key = this.dataset.key;
+						deleteProduct(key);
+					});
+					productDiv.appendChild(deleteButton);
+	
+					productContainer.appendChild(productDiv);
+				}
+			});
+		}
+	
+		// Function to delete a product from the database
+		function deleteProduct(key) {
+			var productRef = database.ref("products/" + key);
+			productRef.remove()
+				.then(function() {
+					console.log("Product deleted successfully");
+				})
+				.catch(function(error) {
+					console.error("Error deleting product:", error);
+				});
+		}
+	
+		// Event listener for submitting the product form
+		var productForm = document.getElementById("product-form");
+		productForm.addEventListener("submit", function(event) {
+			event.preventDefault();
+			var nameField = document.getElementById("product-name");
+			var priceField = document.getElementById("product-price");
+			var quantityField = document.getElementById("product-quantity");
+			var imageField = document.getElementById("product-image");
+	
+			var product = {
+				name: nameField.value,
+				price: parseFloat(priceField.value),
+				quantity: parseInt(quantityField.value),
+				image: imageField.value
+			};
+	
+			database.ref("products").push(product)
+				.then(function() {
+					console.log("Product added successfully");
+					nameField.value = "";
+					priceField.value = "";
+					quantityField.value = "1";
+					imageField.value = "";
+				})
+				.catch(function(error) {
+					console.error("Error adding product:", error);
+				});
+		});
+	
+		// Retrieve initial product list
+		getProducts();
+	</script>
+</body>
+</html>
